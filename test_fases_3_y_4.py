@@ -12,7 +12,10 @@ import numpy as np
 RUTA_RAIZ = Path(__file__).resolve().parent
 sys.path.insert(0, str(RUTA_RAIZ))
 
-calidad = __import__("etl.1_calidad", fromlist=["cargar_datasets"])
+try:
+    calidad = __import__("etl.calidad_1", fromlist=["cargar_datasets", "cargar_y_perfilar_datos"])
+except ModuleNotFoundError:
+    calidad = __import__("etl.1_calidad", fromlist=["cargar_datasets"])
 transformacion = __import__("etl.2_transformacion", fromlist=[
     "tratar_outliers_iqr", "homologar_fecha_iso", "homologar_moneda_mxn",
     "normalizar_clabe", "ejecutar_fase_3", "ejecutar_fase_4", "ejecutar_fase_5",

@@ -49,6 +49,21 @@ def cargar_y_perfilar_datos(ruta_archivo: str, tipo: str = 'csv') -> tuple:
     
     return df_limpio, df_reporte, metadata
 
+def cargar_datasets() -> dict:
+    """
+    Función de compatibilidad para cargar todos los datasets perfilados del proyecto.
+    """
+    from pathlib import Path
+    ruta_datasets = Path(__file__).resolve().parent.parent / "datasets"
+    df_cuentas, _, _ = cargar_y_perfilar_datos(str(ruta_datasets / "catalogo_cuentas.csv"), "csv")
+    df_atm, _, _ = cargar_y_perfilar_datos(str(ruta_datasets / "transacciones_atm.csv"), "csv")
+    df_dig, _, _ = cargar_y_perfilar_datos(str(ruta_datasets / "transferencias_digitales.json"), "json")
+    return {
+        "catalogo_cuentas": df_cuentas,
+        "transacciones_atm": df_atm,
+        "transferencias_digitales": df_dig,
+    }
+
 def imputar_faltantes(df: pd.DataFrame, num_cols: list, cat_cols: list, critical_cols: list) -> pd.DataFrame:
     """
     FASE 2: Manejo de Faltantes e Imputación.

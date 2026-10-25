@@ -1,40 +1,79 @@
-from etl.calidad_1 import (
-    cargar_y_perfilar_datos, 
-    imputar_faltantes, 
-    tratar_outliers_iqr
-)
+"""
+Pipeline ETL Fintech - Orquestador Principal (Grupo 2)
+Materia: Ingeniería de Datos (ATD-2602)
+Tecnológico Nacional de México - Campus Colima
+
+Este script orquesta la ejecución secuencial de los módulos del equipo:
+- FASE 1: Calidad y Perfilado (Ingeniero 1: Erick Moisés Urbina)
+- FASES 2 a 5: Transformación, Outliers e Integración (Ingeniero 2: Luis Fernando Machuca)
+- FASES 6 y 7: Validación Pydantic y Carga Transaccional (Ingeniero 3: Bruno Rigoberto Zamora)
+"""
+
+from pathlib import Path
+import importlib
+import pandas as pd
+
+# ------------------------------------------------------------------------------
+# IMPORTACIÓN MODULAR
+# ------------------------------------------------------------------------------
+try:
+    calidad = importlib.import_module("etl.calidad_1")
+except ModuleNotFoundError:
+    calidad = importlib.import_module("etl.1_calidad")
+
+transformacion = importlib.import_module("etl.2_transformacion")
+
 
 def main():
-    # Ruta del archivo basada en la estructura de tu proyecto
-    ruta_atm = "datasets/transacciones_atm.csv"
-    
-    # --- EJECUCIÓN MÓDULO 1 (CALIDAD) ---
-    df_atm, reporte_atm, meta_atm = cargar_y_perfilar_datos(ruta_atm, 'csv')
-    
-    # Imputación usando los nombres reales de tus columnas
-    df_atm_imputado = imputar_faltantes(
-        df_atm, 
-        num_cols=['monto_mxn', 'comision_aplicada'], 
-        cat_cols=['id_cajero', 'tipo_operacion', 'resultado'], 
-        critical_cols=['id_cuenta', 'id_transaccion']
+    print("=" * 70)
+    print("PIPELINE ETL FINTECH - GRUPO 2")
+    print("=" * 70)
+
+    # ==========================================================================
+    # FASE 1: DIAGNÓSTICO DE CALIDAD INICIAL (INGENIERO 1)
+    # ==========================================================================
+    print("\n" + "=" * 60)
+    print("FASE 1: DIAGNÓSTICO DE CALIDAD INICIAL (INGENIERO 1)")
+    print("=" * 60)
+
+    ruta_datasets = Path(__file__).resolve().parent / "datasets"
+
+    df_cuentas, rep_cuentas, meta_cuentas = calidad.cargar_y_perfilar_datos(
+        str(ruta_datasets / "catalogo_cuentas.csv"), "csv"
     )
-    
-    # Tratamiento de outliers apuntando a 'monto_mxn'
-    df_atm_final, df_atm_corruptos = tratar_outliers_iqr(df_atm_imputado, 'monto_mxn')
-    
-    # --- VISUALIZACIÓN CENTRALIZADA ---
-    print("\n=== FASE 1: DIAGNÓSTICO DE CALIDAD ===")
-    print("Metadatos:", meta_atm)
-    print("\nReporte de Nulos:")
-    print(reporte_atm)
-    
-    print("\n=== FASE 3: OUTLIERS Y VALORES IMPOSIBLES ===")
-    print(f"Registros válidos (Capping aplicado): {len(df_atm_final)}")
-    print(f"Registros corruptos aislados (<= 0): {len(df_atm_corruptos)}")
-    
-    print("\n=== MUESTRA DE DATOS LIMPIOS (Primeras 5 filas) ===")
-    print(df_atm_final.head())
+    df_atm, rep_atm, meta_atm = calidad.cargar_y_perfilar_datos(
+        str(ruta_datasets / "transacciones_atm.csv"), "csv"
+    )
+    df_dig, rep_dig, meta_dig = calidad.cargar_y_perfilar_datos(
+        str(ruta_datasets / "transferencias_digitales.json"), "json"
+    )
+
+    print(f"\n[ATM] Filas: {meta_atm['filas_originales']} | Duplicados eliminados: {meta_atm['duplicados_eliminados']}")
+    print(f"[DIGITAL] Filas: {meta_dig['filas_originales']} | Duplicados eliminados: {meta_dig['duplicados_eliminados']}")
+    print(f"[CATÁLOGO] Filas: {meta_cuentas['filas_originales']}")
+
+    datasets_crudos = {
+        "catalogo_cuentas": df_cuentas,
+        "transacciones_atm": df_atm,
+        "transferencias_digitales": df_dig,
+    }
+
+    # ==========================================================================
+    # FASES 2 A 5: TRANSFORMACIÓN, OUTLIERS E INTEGRACIÓN (INGENIERO 2)
+    # ==========================================================================
+    print("\n" + "=" * 60)
+    print("FASES 2 A 5: TRANSFORMACIÓN, OUTLIERS E INTEGRACIÓN (INGENIERO 2)")
+    print("=" * 60)
+
+    resultado_transformacion = transformacion.iniciar_transformacion(datasets_crudos)
+    df_unificado = resultado_transformacion["df_unificado"]
+
+    print(f"[OK] Fases 1 a 5 ejecutadas exitosamente.")
+    print(f"[ENTREGABLE PARA INGENIERO 3] DataFrame unificado listo: "
+          f"{df_unificado.shape[0]} filas x {df_unificado.shape[1]} columnas.")
+
+    return df_unificado
+
 
 if __name__ == "__main__":
     main()
-
