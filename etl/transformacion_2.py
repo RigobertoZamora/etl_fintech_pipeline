@@ -72,8 +72,12 @@ def tratar_faltantes_e_imputar(df: pd.DataFrame, nombre_dataset: str) -> pd.Data
     cols_numericas = df_clean.select_dtypes(include=["number"]).columns
     cols_categoricas = df_clean.select_dtypes(include=["object", "string"]).columns
 
+    # Lista de columnas que NO deben inventarse si vienen vacías
+    columnas_criticas = ["comision_aplicada", "comision_mxn"] 
+
     for col in cols_numericas:
-        if df_clean[col].isna().any():
+        # Solo rellena si tiene nulos Y NO es una columna crítica
+        if col not in columnas_criticas and df_clean[col].isna().any():
             mediana = df_clean[col].median()
             df_clean[col] = df_clean[col].fillna(mediana)
 
@@ -388,21 +392,24 @@ def ejecutar_fase_4(
 # ==============================================================================
 # FASE 5: TRANSFORMACIÓN, ESCALAMIENTO Y DISCRETIZACIÓN
 # ==============================================================================
-
 def escalar_min_max(df: pd.DataFrame, col_monto: str = "monto_mxn") -> pd.DataFrame:
     """
-    Normaliza la columna numérica monto_mxn al rango acotado [0, 1] en 'monto_escalado':
-    x' = (x - x_min) / (x_max - x_min)
-
-    Orden de ejecución obligatorio:
-    Se ejecuta después de haber aplicado el Capping con IQR en la Fase 3 para evitar
-    que los outliers compriman los valores operativos cerca de cero.
+    Normaliza la columna numérica monto_mxn al rango acotado [0, 1].
+    Ignora los montos <= 0 para no distorsionar el cálculo del mínimo.
     """
     df_esc = df.copy()
-    min_val = float(df_esc[col_monto].min())
-    max_val = float(df_esc[col_monto].max())
+    
+    # Filtrar solo valores reales para buscar los límites matemáticos
+    valores_validos = df_esc[df_esc[col_monto] > 0][col_monto]
+    
+    if not valores_validos.empty:
+        min_val = float(valores_validos.min())
+        max_val = float(valores_validos.max())
+    else:
+        min_val, max_val = 0.0, 0.0
 
     if max_val - min_val > 0:
+        # Aplicamos la fórmula a toda la columna (los negativos quedarán por debajo de 0, lo cual es ideal para cuarentena)
         df_esc["monto_escalado"] = (df_esc[col_monto] - min_val) / (max_val - min_val)
     else:
         df_esc["monto_escalado"] = 0.0

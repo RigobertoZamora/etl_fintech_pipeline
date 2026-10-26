@@ -16,12 +16,11 @@ import pandas as pd
 # ------------------------------------------------------------------------------
 # IMPORTACIÓN MODULAR
 # ------------------------------------------------------------------------------
-try:
-    calidad = importlib.import_module("etl.calidad_1")
-except ModuleNotFoundError:
-    calidad = importlib.import_module("etl.1_calidad")
+calidad = importlib.import_module("etl.calidad_1")
 
-transformacion = importlib.import_module("etl.2_transformacion")
+transformacion = importlib.import_module("etl.transformacion_2")
+
+validacion = importlib.import_module("etl.validacion_bd_3")
 
 
 def main():
@@ -71,6 +70,20 @@ def main():
     print(f"[OK] Fases 1 a 5 ejecutadas exitosamente.")
     print(f"[ENTREGABLE PARA INGENIERO 3] DataFrame unificado listo: "
           f"{df_unificado.shape[0]} filas x {df_unificado.shape[1]} columnas.")
+
+    # ==========================================================================
+    # FASES 6 Y 7: VALIDACIÓN PYDANTIC Y CARGA TRANSACCIONAL (INGENIERO 3)
+    # ==========================================================================
+    print("\n" + "=" * 60)
+    print("FASES 6 Y 7: VALIDACIÓN PYDANTIC Y CARGA A POSTGRESQL")
+    print("=" * 60)
+
+    # Aquí entra en acción tu módulo recibiendo la tabla unificada
+    validacion.iniciar_validacion_y_carga(df_unificado)
+
+    print("\n" + "=" * 70)
+    print("PIPELINE ETL COMPLETADO EXITOSAMENTE")
+    print("=" * 70)
 
     return df_unificado
 

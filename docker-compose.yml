@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db_banco:
+    image: postgres:15-alpine
+    container_name: postgres_fintech
+    environment:
+      POSTGRES_USER: admin_etl
+      POSTGRES_PASSWORD: password_seguro
+      POSTGRES_DB: banco_etl
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
