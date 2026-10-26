@@ -147,8 +147,8 @@ La persistencia se realizará en **PostgreSQL / SQLite** bajo control estricto d
 
 ## 4. Firmas de Conformidad Técnica (Entregable Día 1)
 
-| Rol en el Proyecto | Nombre del Integrante | Usuario Git | Fecha de Aprobación |
-| :--- | :--- | :--- | :--- |
-| **Ingeniero/a 1** (Calidad, Nulos y Outliers) | **Erick Moisés Urbina** | `@sonrisa-fan` | 
-| **Ingeniero/a 2** (Transformación e Integración) | **Luis Fernando Machuca** | `@LuisFerMCDev` | 
-| **Ingeniero/a 3** (Validación, Resiliencia y BD) | **Bruno Rigoberto Zamora** | `@RigobertoZamora` | 
+| Rol en el Proyecto                             | Nombre del Integrante      | Usuario Git        | Fecha de Aprobación |
+| :--------------------------------------------- | :------------------------- | :----------------- | :------------------ |
+| **Ingeniero 1** (Calidad, Nulos y Outliers)    | **Erick Moisés Urbina**    | `@sonrisa-fan`     | 2026-10-23          |
+| **Ingeniero 2** (Transformación e Integración) | **Luis Fernando Machuca**  | `@LuisFerMCDev`    | 2026-10-23          |
+| **Ingeniero 3** (Validación, Resiliencia y BD) | **Bruno Rigoberto Zamora** | `@RigobertoZamora` | 2026-10-23          |
