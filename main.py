@@ -35,6 +35,22 @@ def main():
     print("FASE 1: DIAGNÓSTICO DE CALIDAD INICIAL (INGENIERO 1)")
     print("=" * 60)
 
+    # Ruta del archivo basada en la estructura de tu proyecto
+    ruta_atm = "datasets/transacciones_atm.csv"
+    
+    # --- EJECUCIÓN MÓDULO 1 (CALIDAD) ---
+    df_atm, reporte_atm, meta_atm = calidad.cargar_y_perfilar_datos(ruta_atm, 'csv')
+    
+    # Imputación usando los nombres reales de tus columnas
+    df_atm_imputado = calidad.imputar_faltantes(
+        df_atm, 
+        num_cols=['monto_mxn', 'comision_aplicada'], 
+        cat_cols=['id_cajero', 'tipo_operacion', 'resultado'], 
+        critical_cols=['id_cuenta', 'id_transaccion']
+    )
+    
+    # Tratamiento de outliers apuntando a 'monto_mxn'
+    df_atm_final, df_atm_corruptos = calidad.tratar_outliers_iqr(df_atm_imputado, 'monto_mxn')
     ruta_datasets = Path(__file__).resolve().parent / "datasets"
 
     df_cuentas, rep_cuentas, meta_cuentas = calidad.cargar_y_perfilar_datos(
@@ -50,6 +66,10 @@ def main():
     print(f"\n[ATM] Filas: {meta_atm['filas_originales']} | Duplicados eliminados: {meta_atm['duplicados_eliminados']}")
     print(f"[DIGITAL] Filas: {meta_dig['filas_originales']} | Duplicados eliminados: {meta_dig['duplicados_eliminados']}")
     print(f"[CATÁLOGO] Filas: {meta_cuentas['filas_originales']}")
+    print("\nReporte de Nulos:")
+    print(reporte_atm)
+    print("\n=== MUESTRA DE DATOS LIMPIOS (Primeras 5 filas) ===")
+    print(df_atm_final.head())
 
     datasets_crudos = {
         "catalogo_cuentas": df_cuentas,
